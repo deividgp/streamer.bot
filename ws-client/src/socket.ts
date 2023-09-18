@@ -1,6 +1,6 @@
 import { WebSocket } from "ws";
 
-const PORT: number = +process.env.PORT | 9001;
+const PORT: number = +process.env.PORT | 8080;
 const ws = new WebSocket("ws://127.0.0.1:" + PORT + "/");
 
 ws.on("error", console.error);
