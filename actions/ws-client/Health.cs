@@ -6,15 +6,15 @@ public class CPHInline
     {
         switch (args["filter"].ToString())
         {
-            case "black":
+            case "dead":
                 CPH.ObsHideSource("Escena", "Red");
                 CPH.ObsShowSource("Escena", "Black");
                 break;
-            case "red":
+            case "low-hp":
                 CPH.ObsHideSource("Escena", "Black");
                 CPH.ObsShowSource("Escena", "Red");
                 break;
-            case "no":
+            case "alive":
                 CPH.ObsHideSource("Escena", "Black");
                 CPH.ObsHideSource("Escena", "Red");
                 break;

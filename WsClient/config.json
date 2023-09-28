@@ -1,0 +1,9 @@
+{
+  "wsPort": 8080,
+  "features": {
+    "health": {
+      "actionName": "Health2",
+      "hpPercentage": 15
+    }
+  }
+}

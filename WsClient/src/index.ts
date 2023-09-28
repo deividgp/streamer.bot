@@ -10,4 +10,5 @@ const agent: Agent = new Agent({
 setGlobalDispatcher(agent);
 
 setInterval(methods.fetchActivePlayerData, 250);
-//setInterval(methods.fetchEvents, 500);
+setInterval(methods.fetchPlayerListData, 250);
+//setInterval(methods.fetchEventData, 500);

@@ -1,40 +1,41 @@
 import { ws } from "./socket";
+import { config } from "./config";
 
 const activePlayerDataUrl: string =
     "https://127.0.0.1:2999/liveclientdata/activeplayer";
 const eventDataUrl: string = "https://127.0.0.1:2999/liveclientdata/eventdata";
-const hpPercentage: number = +process.env.HPPERCENTAGE | 30;
+const playerListDataUrl: string = "https://127.0.0.1:2999/liveclientdata/playerlist";
+const hpPercentage: number = config.features.health.hpPercentage | 30;
 
-let lastEventId: number = 0;
 let summonerName: string;
+let lastEventId: number = 0;
+let isDead: boolean = false;
 
-function fetchActivePlayerData(): void {
+export function fetchActivePlayerData(): void {
     fetch(activePlayerDataUrl)
         .then((res) => res.json())
         .then(async (json) => {
             summonerName = json.summonerName;
+
+            if (isDead) return;
+
             const currentHP: number = json.championStats.currentHealth;
-            let filter = "no";
+            let filter = "alive";
 
-            if (currentHP == 0) {
-                console.log("Black filter");
-                filter = "black";
-            } else {
-                const minHP: number =
-                    (json.championStats.maxHealth * hpPercentage) / 100;
+            const minHP: number =
+                (json.championStats.maxHealth * hpPercentage) / 100;
 
-                if (currentHP <= minHP) {
-                    console.log("Red filter");
-                    filter = "red";
-                }
+            if (currentHP <= minHP) {
+                console.log("Red filter");
+                filter = "low-hp";
             }
-            
+
             ws.send(
                 JSON.stringify(
                     {
                         "request": "DoAction",
                         "action": {
-                            "name": process.argv[2]
+                            "name": config.features.health.actionName
                         },
                         "args": {
                             "filter": filter,
@@ -44,10 +45,43 @@ function fetchActivePlayerData(): void {
                 )
             );
         })
+        .catch(() => {
+        });
+}
+
+export function fetchPlayerListData(): void {
+    fetch(playerListDataUrl)
+        .then((res) => res.json())
+        .then(async (json) => {
+            const player = json.find(
+                (element: any) => element.summonerName == summonerName
+            );
+
+            isDead = player.isDead;
+
+            if (player.isDead) {
+                console.log("Black filter");
+
+                ws.send(
+                    JSON.stringify(
+                        {
+                            "request": "DoAction",
+                            "action": {
+                                "name": config.features.health.actionName
+                            },
+                            "args": {
+                                "filter": "dead",
+                            },
+                            "id": "123"
+                        }
+                    )
+                );
+            }
+        })
         .catch(() => { });
 }
 
-function fetchEvents(): void {
+export function fetchEventData(): void {
     fetch(eventDataUrl)
         .then((res) => res.json())
         .then(async (json) => {
@@ -66,5 +100,3 @@ function fetchEvents(): void {
         })
         .catch(() => { });
 }
-
-export { fetchActivePlayerData, fetchEvents };
