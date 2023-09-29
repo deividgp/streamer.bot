@@ -10,6 +10,7 @@ const hpPercentage: number = config.features.health.hpPercentage | 30;
 let summonerName: string;
 let lastEventId: number = 0;
 let isDead: boolean = false;
+let lastHp: number = 0;
 
 export function fetchActivePlayerData(): void {
     fetch(activePlayerDataUrl)
@@ -19,16 +20,27 @@ export function fetchActivePlayerData(): void {
 
             if (isDead) return;
 
-            const currentHP: number = json.championStats.currentHealth;
-            let filter = "alive";
+            const currentHp: number = json.championStats.currentHealth;
 
-            const minHP: number =
+            let filter = undefined;
+
+            // minHp required to activate the red filter
+            const minHp: number =
                 (json.championStats.maxHealth * hpPercentage) / 100;
 
-            if (currentHP <= minHP) {
-                console.log("Red filter");
+            if (lastHp <= minHp && currentHp > minHp) {
+                // If lastHp is lower or equal than minHp and currentHp is higher than minHp
+                filter = "alive";
+                console.log("Alive");
+            } else if (lastHp > minHp && currentHp <= minHp) {
+                // If lastHp is higher than minHp and currentHp is lower than minHp
                 filter = "low-hp";
+                console.log("Red filter");
             }
+
+            lastHp = currentHp == 0 ? -1 : currentHp;
+
+            if (filter == undefined) return;
 
             ws.send(
                 JSON.stringify(
@@ -59,7 +71,8 @@ export function fetchPlayerListData(): void {
 
             isDead = player.isDead;
 
-            if (player.isDead) {
+            if (player.isDead && lastHp != 0) {
+                lastHp = 0;
                 console.log("Black filter");
 
                 ws.send(
