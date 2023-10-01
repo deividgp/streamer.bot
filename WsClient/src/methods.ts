@@ -7,7 +7,6 @@ const eventDataUrl: string = "https://127.0.0.1:2999/liveclientdata/eventdata";
 const playerListDataUrl: string = "https://127.0.0.1:2999/liveclientdata/playerlist";
 const hpPercentage: number = config.features.health.hpPercentage | 30;
 
-let summonerName: string;
 let lastEventId: number = 0;
 let isDead: boolean = false;
 let lastHp: number = 0;
@@ -16,7 +15,7 @@ export function fetchActivePlayerData(): void {
     fetch(activePlayerDataUrl)
         .then((res) => res.json())
         .then(async (json) => {
-            summonerName = json.summonerName;
+            global.summonerName = json.summonerName;
 
             if (isDead) return;
 
@@ -58,6 +57,20 @@ export function fetchActivePlayerData(): void {
             );
         })
         .catch(() => {
+            ws.send(
+                JSON.stringify(
+                    {
+                        "request": "DoAction",
+                        "action": {
+                            "name": config.features.health.actionName
+                        },
+                        "args": {
+                            "filter": "alive",
+                        },
+                        "id": "123"
+                    }
+                )
+            );
         });
 }
 
@@ -66,7 +79,7 @@ export function fetchPlayerListData(): void {
         .then((res) => res.json())
         .then(async (json) => {
             const player = json.find(
-                (element: any) => element.summonerName == summonerName
+                (element: any) => element.summonerName == global.summonerName
             );
 
             isDead = player.isDead;
@@ -108,7 +121,7 @@ export function fetchEventData(): void {
 
             const multikill = events.findLast(
                 (element: any) =>
-                    element.EventName == "Multikill" && element.KillerName == summonerName
+                    element.EventName == "Multikill" && element.KillerName == global.summonerName
             );
         })
         .catch(() => { });

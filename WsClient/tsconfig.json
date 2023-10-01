@@ -5,7 +5,7 @@
     "sourceMap": true,
     "outDir": "dist",
     "baseUrl": "src",
-    "noImplicitAny": true,
+    "noImplicitAny": false,
     "removeComments": true,
     "preserveConstEnums": true,
     "esModuleInterop": true,
