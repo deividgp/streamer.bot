@@ -56,22 +56,7 @@ export function fetchActivePlayerData(): void {
                 )
             );
         })
-        .catch(() => {
-            ws.send(
-                JSON.stringify(
-                    {
-                        "request": "DoAction",
-                        "action": {
-                            "name": config.features.health.actionName
-                        },
-                        "args": {
-                            "filter": "alive",
-                        },
-                        "id": "123"
-                    }
-                )
-            );
-        });
+        .catch(() => {});
 }
 
 export function fetchPlayerListData(): void {
