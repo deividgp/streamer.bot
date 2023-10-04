@@ -10,6 +10,7 @@ const killsTitle = "5 O MÁS KILLS POR PARTE DE SENDITO?";
 let intervalId: number | NodeJS.Timeout;
 let gameEndIntervalId: number;
 let gameEnded: boolean = false;
+let cancelPrediction: boolean = false;
 
 ws.on("error", console.error);
 
@@ -42,16 +43,15 @@ ws.on("message", (data) => {
             console.log(wsdata);
             console.log(prediction.outcomes);
             gameEnded = false;
-            gameEndIntervalId = setInterval(fetchGameEnd, 500);
 
             switch (prediction.title) {
                 case wlTitle:
                 case minTitle:
-                    clearInterval(gameEndIntervalId);
                     intervalId = setInterval(fetchGameEnd, 500, prediction.id, prediction.outcomes[0].id, prediction.outcomes[1].id, prediction.title);
                     break;
                 case deathsTitle:
                 case killsTitle:
+                    gameEndIntervalId = setInterval(fetchGameEnd, 500);
                     intervalId = setInterval(fetchKda, 1000, prediction.id, prediction.outcomes[0].id, prediction.outcomes[1].id, prediction.title);
                     break;
             }
@@ -68,15 +68,37 @@ function fetchGameEnd(predictionId: string, outcome1Id: string, outcome2Id: stri
             if (lastEvent.EventName != "GameEnd") return;
 
             gameEnded = true;
+            
+            cancelPrediction = lastEvent.EventTime / 60 <= 10;
 
             clearInterval(gameEndIntervalId);
 
             if (predictionId == undefined) return;
 
+            if (cancelPrediction) {
+                ws.send(
+                    JSON.stringify(
+                        {
+                            "request": "DoAction",
+                            "action": {
+                                "name": config.features.predictions.cancelActionName
+                            },
+                            "args": {
+                                "predictionId": predictionId
+                            },
+                            "id": "123"
+                        }
+                    )
+                );
+
+                clearInterval(intervalId);
+                return;
+            }
+
             let outcomeId: string;
 
             if (title == wlTitle) {
-                outcomeId = lastEvent == "Win" ? outcome1Id : outcome2Id;
+                outcomeId = lastEvent.Result == "Win" ? outcome1Id : outcome2Id;
             } else if (title == minTitle) {
                 outcomeId = lastEvent.EventTime / 60 <= 25 ? outcome1Id : outcome2Id;
             }
@@ -86,7 +108,7 @@ function fetchGameEnd(predictionId: string, outcome1Id: string, outcome2Id: stri
                     {
                         "request": "DoAction",
                         "action": {
-                            "name": config.features.predictions.actionName
+                            "name": config.features.predictions.resolveActionName
                         },
                         "args": {
                             "predictionId": predictionId,
@@ -114,7 +136,7 @@ function fetchKda(predictionId: string, outcome1Id: string, outcome2Id: string, 
                     {
                         "request": "DoAction",
                         "action": {
-                            "name": config.features.predictions.actionName
+                            "name": config.features.predictions.resolveActionName
                         },
                         "args": {
                             "predictionId": predictionId,
@@ -129,22 +151,41 @@ function fetchKda(predictionId: string, outcome1Id: string, outcome2Id: string, 
         })
         .catch(() => {
             if (!gameEnded) return;
-
-            ws.send(
-                JSON.stringify(
-                    {
-                        "request": "DoAction",
-                        "action": {
-                            "name": config.features.predictions.actionName
-                        },
-                        "args": {
-                            "predictionId": predictionId,
-                            "outcomeId": outcome2Id,
-                        },
-                        "id": "123"
-                    }
-                )
-            );
+            
+            if(cancelPrediction){
+                ws.send(
+                    JSON.stringify(
+                        {
+                            "request": "DoAction",
+                            "action": {
+                                "name": config.features.predictions.cancelActionName
+                            },
+                            "args": {
+                                "predictionId": predictionId
+                            },
+                            "id": "123"
+                        }
+                    )
+                );
+            }
+            else
+            {
+                ws.send(
+                    JSON.stringify(
+                        {
+                            "request": "DoAction",
+                            "action": {
+                                "name": config.features.predictions.resolveActionName
+                            },
+                            "args": {
+                                "predictionId": predictionId,
+                                "outcomeId": outcome2Id,
+                            },
+                            "id": "123"
+                        }
+                    )
+                );
+            }
 
             clearInterval(intervalId);
         });

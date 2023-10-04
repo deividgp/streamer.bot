@@ -2,11 +2,12 @@
   "wsPort": 8080,
   "features": {
     "health": {
-      "actionName": "Health2",
+      "actionName": "Health",
       "hpPercentage": 15
     },
     "predictions": {
-      "actionName": "resolvePrediction",
+      "resolveActionName": "resolvePrediction",
+      "cancelActionName": "cancelPrediction",
       "enabled": "no"
     }
   }
