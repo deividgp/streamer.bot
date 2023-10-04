@@ -15,6 +15,9 @@ ws.on("error", console.error);
 
 ws.on("open", () => {
     console.log("Connected");
+
+    if(config.features.predictions.enabled == "no") return;
+
     ws.send(JSON.stringify(
         {
             "request": "Subscribe",
@@ -75,7 +78,7 @@ function fetchGameEnd(predictionId: string, outcome1Id: string, outcome2Id: stri
             if (title == wlTitle) {
                 outcomeId = lastEvent == "Win" ? outcome1Id : outcome2Id;
             } else if (title == minTitle) {
-                outcomeId = lastEvent.EventTime / 60 >= 25 ? outcome1Id : outcome2Id;
+                outcomeId = lastEvent.EventTime / 60 <= 25 ? outcome1Id : outcome2Id;
             }
 
             ws.send(
@@ -83,7 +86,7 @@ function fetchGameEnd(predictionId: string, outcome1Id: string, outcome2Id: stri
                     {
                         "request": "DoAction",
                         "action": {
-                            "name": "resolvePrediction"
+                            "name": config.features.predictions.actionName
                         },
                         "args": {
                             "predictionId": predictionId,
@@ -111,7 +114,7 @@ function fetchKda(predictionId: string, outcome1Id: string, outcome2Id: string, 
                     {
                         "request": "DoAction",
                         "action": {
-                            "name": "resolvePrediction"
+                            "name": config.features.predictions.actionName
                         },
                         "args": {
                             "predictionId": predictionId,
@@ -132,7 +135,7 @@ function fetchKda(predictionId: string, outcome1Id: string, outcome2Id: string, 
                     {
                         "request": "DoAction",
                         "action": {
-                            "name": "resolvePrediction"
+                            "name": config.features.predictions.actionName
                         },
                         "args": {
                             "predictionId": predictionId,

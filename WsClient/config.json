@@ -4,6 +4,10 @@
     "health": {
       "actionName": "Health2",
       "hpPercentage": 15
+    },
+    "predictions": {
+      "actionName": "resolvePrediction",
+      "enabled": "no"
     }
   }
 }
