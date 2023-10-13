@@ -1,5 +1,7 @@
 import { Agent, setGlobalDispatcher } from "undici";
 import * as methods from "./methods";
+import "./clients/obs";
+import "./clients/heat";
 
 const agent: Agent = new Agent({
   connect: {

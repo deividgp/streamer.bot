@@ -14,6 +14,7 @@
   "license": "ISC",
   "dependencies": {
     "undici": "^5.24.0",
+    "winston": "^3.11.0",
     "ws": "^8.14.1"
   },
   "devDependencies": {

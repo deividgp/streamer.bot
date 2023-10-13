@@ -1,5 +1,9 @@
 {
   "wsPort": 8080,
+  "obs": {
+    "port": 4455,
+    "password": "pZeg0zAmcEVekBfJ"
+  },
   "features": {
     "health": {
       "actionName": "Health",
@@ -9,6 +13,25 @@
       "resolveActionName": "resolvePrediction",
       "cancelActionName": "cancelPrediction",
       "enabled": "no"
+    },
+    "heat": {
+      "channelId": 33734881,
+      "sources": [
+        {
+          "name": "orange",
+          "xStart": 1,
+          "xEnd": 2,
+          "yStart": 3,
+          "yEnd": 4
+        },
+        {
+          "name": "kenny",
+          "xStart": 1,
+          "xEnd": 2,
+          "yStart": 3,
+          "yEnd": 4
+        }
+      ]
     }
   }
 }

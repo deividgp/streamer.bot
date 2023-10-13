@@ -1,4 +1,4 @@
-import { ws } from "./socket";
+import { sb } from "./clients/sb";
 import { config } from "./config";
 
 const activePlayerDataUrl: string =
@@ -41,7 +41,7 @@ export function fetchActivePlayerData(): void {
 
             if (filter == undefined) return;
 
-            ws.send(
+            sb.send(
                 JSON.stringify(
                     {
                         "request": "DoAction",
@@ -73,7 +73,7 @@ export function fetchPlayerListData(): void {
                 lastHp = 0;
                 console.log("Black filter");
 
-                ws.send(
+                sb.send(
                     JSON.stringify(
                         {
                             "request": "DoAction",
